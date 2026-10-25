@@ -36,7 +36,10 @@ def main(page: ft.Page):
     lista_strumenti = ft.ListView(expand=True, spacing=5, padding=10, auto_scroll=True)
 
     # Tutti i TextField per le info necessarie per aggiungere un nuovo strumento (tipo, marca, anno, contatore posti)
-    # TODO
+    input_tipo = ft.TextField(label='Tipo', width=300)
+    input_marca = ft.TextField(label='Marca', width=300)
+    input_anno = ft.TextField(label='Anno acquisto', width=300)
+    valore_contatore = ft.TextField(value='0', width=60, text_align=ft.TextAlign.CENTER)
 
     # --- FUNZIONI APP ---
     def aggiorna_lista_strumenti():
@@ -55,14 +58,59 @@ def main(page: ft.Page):
         txt_responsabile.value = f"Responsabile: {deposito.get_responsabile()}"
 
     # Handlers per la gestione dei pulsanti utili all'inserimento di un nuovo strumento
-    # TODO
+    def decrementa_valore(e):
+        try:
+            valore = float(valore_contatore.value)
+            if valore >= 10:
+                valore_contatore.value = str(int(valore-10))
+            else:
+                valore_contatore.value = "0"
+        except ValueError:
+            valore_contatore.value = "10"
+
+    def incrementa_valore(e):
+        try:
+            valore = float(valore_contatore.value)
+            valore_contatore.value = str(int(valore+10))
+        except ValueError:
+            valore_contatore.value = "10"
+
+    def aggiungi_strumento(e):
+        tipo = input_tipo.value
+        marca = input_marca.value
+        str_anno = input_anno.value
+        str_valore = valore_contatore.value
+        if not tipo or not marca or not str_anno:
+            alert.show_alert("Errore: Compilare tutti i campi per inserire lo strumento.")
+            return
+        try:
+            anno = int(str_anno)
+        except ValueError:
+            alert.show_alert("Errore: Il campo Anno acquisto deve essere un intero valido.")
+            return
+        try:
+            valore = float(str_valore)
+            if valore < 0:
+                alert.show_alert("Errore: il valore dello strumento non può essere negativo.")
+                return
+        except:
+            alert.show_alert("Errore: Il valore dello strumento deve essere un numero valido.")
+            return
+        deposito.aggiungi_strumento(tipo, marca, anno, valore)
+        input_tipo.value = ""
+        input_marca.value = ""
+        input_anno.value = ""
+        valore_contatore.value = "0"
+        aggiorna_lista_strumenti()
 
     # --- EVENTI ---
     toggle_cambia_tema = ft.Switch(label="Tema scuro", value=True, on_change=cambia_tema)
     pulsante_conferma_responsabile = ft.Button("Conferma", on_click=conferma_responsabile)
 
     # Pulsanti per la gestione dell'inserimento di un nuovo strumento
-    # TODO
+    pulsante_meno = ft.IconButton(ft.Icons.REMOVE, icon_color='red', on_click=decrementa_valore)
+    pulsante_piu = ft.IconButton(ft.Icons.ADD, icon_color='green', on_click=incrementa_valore)
+    pulsante_aggiungi_strumento = ft.Button("Aggiungi strumento", on_click=aggiungi_strumento)
 
     # --- LAYOUT ---
     page.add(
@@ -80,7 +128,12 @@ def main(page: ft.Page):
                alignment=ft.MainAxisAlignment.CENTER),
 
         # Sezione 3
-        # TODO
+        ft.Divider(),
+        ft.Text("Aggiungi Nuovo Strumento", size=20),
+        ft.Row(spacing=50,
+               controls=[input_tipo, input_marca, input_anno, pulsante_meno, valore_contatore, pulsante_piu],
+               alignment=ft.MainAxisAlignment.CENTER),
+        pulsante_aggiungi_strumento,
 
         # Sezione 4
         ft.Divider(),
